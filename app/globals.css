@@ -1,0 +1,164 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Design tokens ─────────────────────────────────────────────────────────── */
+:root {
+  /* Backgrounds */
+  --color-bg: #faf7f2;
+  --color-bg-secondary: #f2ede4;
+  --color-bg-card: #ffffff;
+
+  /* Text */
+  --color-text: #2b2320;
+  --color-text-muted: #6b5f58;
+
+  /* Accent — terracotta */
+  --color-accent: #c0603c;
+  --color-accent-hover: #a84e2e;
+  --color-accent-light: #f9ede8;
+  --color-accent-fg: #ffffff;
+
+  /* Secondary accent — sage */
+  --color-sage: #7c8b6f;
+  --color-sage-light: #eef1eb;
+  --color-sage-fg: #ffffff;
+
+  /* Border */
+  --color-border: #e8e0d6;
+}
+
+/* Dark mode: system preference as baseline */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-bg: #1c1210;
+    --color-bg-secondary: #231815;
+    --color-bg-card: #2a1e1a;
+    --color-text: #f5ede4;
+    --color-text-muted: #c4b4aa;
+    --color-accent: #d4714a;
+    --color-accent-hover: #e07e58;
+    --color-accent-light: #3a201a;
+    --color-accent-fg: #ffffff;
+    --color-sage: #8fa080;
+    --color-sage-light: #1e2a1a;
+    --color-sage-fg: #ffffff;
+    --color-border: #3a2e2a;
+  }
+}
+
+/* Dark mode: manual override */
+[data-theme='dark'] {
+  --color-bg: #1c1210;
+  --color-bg-secondary: #231815;
+  --color-bg-card: #2a1e1a;
+  --color-text: #f5ede4;
+  --color-text-muted: #c4b4aa;
+  --color-accent: #d4714a;
+  --color-accent-hover: #e07e58;
+  --color-accent-light: #3a201a;
+  --color-accent-fg: #ffffff;
+  --color-sage: #8fa080;
+  --color-sage-light: #1e2a1a;
+  --color-sage-fg: #ffffff;
+  --color-border: #3a2e2a;
+}
+
+/* ─── Base styles ───────────────────────────────────────────────────────────── */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans), system-ui, sans-serif;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display), Georgia, serif;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--color-text);
+  }
+
+  /* Prevent font-size zoom on input focus in iOS Safari */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  /* Visible focus rings on all interactive elements */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* Remove default focus ring (replaced by :focus-visible above) */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  img,
+  video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  a {
+    color: inherit;
+  }
+}
+
+/* ─── Utility classes ───────────────────────────────────────────────────────── */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .container-site {
+    width: 100%;
+    max-width: 1280px;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+
+  @screen sm {
+    .container-site {
+      padding-inline: 1.5rem;
+    }
+  }
+
+  @screen lg {
+    .container-site {
+      padding-inline: 2rem;
+    }
+  }
+
+  /* Safe area helpers for notched phones */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+}
