@@ -12,7 +12,6 @@ const fraunces = Fraunces({
   display: 'swap',
   weight: ['300', '400', '500', '600', '700', '900'],
   style: ['normal', 'italic'],
-  adjustFontFallback: false,
 });
 
 const plusJakartaSans = Plus_Jakarta_Sans({

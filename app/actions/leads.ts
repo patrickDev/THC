@@ -264,9 +264,7 @@ export async function submitPartnerLead(fd: FormData): Promise<ActionResult> {
 // ─── Home Contact Action ───────────────────────────────────────────────────────
 export async function submitHomeLead(fd: FormData): Promise<ActionResult> {
   try {
-    console.log('[home] step 1: action started');
     const ip = await getClientIp();
-    console.log('[home] step 2: got ip', ip);
     const ipHash = hashIp(ip);
     const rateCheck = checkRateLimit(ipHash);
     if (!rateCheck.allowed) {
@@ -276,11 +274,9 @@ export async function submitHomeLead(fd: FormData): Promise<ActionResult> {
     const raw: Record<string, unknown> = {};
     for (const [k, v] of fd.entries()) raw[k] = v;
     raw.consent = raw.consent === 'true' || raw.consent === 'on';
-    console.log('[home] step 3: raw fields', Object.keys(raw).join(','), 'consent=', raw.consent);
 
     const parse = homeContactSchema.safeParse(raw);
     if (!parse.success) {
-      console.log('[home] step 4: validation failed', JSON.stringify(parse.error.issues));
       const errors: Record<string, string[]> = {};
       for (const issue of parse.error.issues) {
         const key = String(issue.path[0] ?? '_');
@@ -288,17 +284,13 @@ export async function submitHomeLead(fd: FormData): Promise<ActionResult> {
       }
       return { ok: false, errors };
     }
-    console.log('[home] step 4: validation passed');
 
     const data = parse.data;
     if (data.website) return { ok: true };
 
     await enableForeignKeys();
-    console.log('[home] step 5: getting db');
 
     const db = await getDb();
-    console.log('[home] step 6: inserting lead');
-
     const [lead] = await db
       .insert(leads)
       .values({
@@ -315,17 +307,13 @@ export async function submitHomeLead(fd: FormData): Promise<ActionResult> {
       })
       .returning();
 
-    console.log('[home] step 7: lead saved, id=', lead?.id);
-
     if (lead) {
-      console.log('[home] step 8: sending emails');
       await sendLeadEmails({ lead, detail: null });
-      console.log('[home] step 9: emails done');
     }
 
     return { ok: true };
   } catch (err) {
-    console.error('[home] FATAL error:', err);
+    console.error('[home] error:', err);
     return { ok: false };
   }
 }

@@ -41,4 +41,6 @@
 
   // ── Secrets (set via CLI — never commit these) ─────────────────────────────
   // wrangler secret put RESEND_API_KEY
+  // wrangler secret put DATABASE_AUTH_TOKEN
+  // wrangler secret put ADMIN_SECRET          ← password for /admin dashboard
 }
