@@ -1,11 +1,13 @@
 import type { MetadataRoute } from 'next';
-import { db } from '@/db/index';
+import { getDb } from '@/db/index';
 import { properties } from '@/db/schema';
+
+export const dynamic = 'force-dynamic';
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://texashomescapital.com';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const allProperties = await db
+  const allProperties = await (await getDb())
     .select({ slug: properties.slug, createdAt: properties.createdAt })
     .from(properties);
 

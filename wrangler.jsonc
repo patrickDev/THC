@@ -1,0 +1,44 @@
+{
+  "name": "texashomescapital",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-08-31",
+  "compatibility_flags": ["nodejs_compat"],
+
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+
+  // ── D1 Database ───────────────────────────────────────────────────────────
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "texashomescapital-db",
+      "database_id": "9f2ef551-64c5-4299-aeaa-af5d61998630"
+    }
+  ],
+
+  // ── Module aliases ────────────────────────────────────────────────────────
+  // @libsql/isomorphic-ws ships a workerd→web.mjs export that is not included
+  // in the NFT build trace. We alias it to a local stub that uses the native
+  // WebSocket global available in Cloudflare Workers.
+  "alias": {
+    "@libsql/isomorphic-ws": "./stubs/libsql-isomorphic-ws.js"
+  },
+
+  // ── Non-secret environment variables ──────────────────────────────────────
+  "vars": {
+    "NODE_ENV": "production",
+    "NEXT_PUBLIC_SITE_URL": "https://texashomescapital.com",
+    "LEAD_NOTIFICATION_EMAIL": "service@texashomescapital.com",
+    "RESEND_FROM_EMAIL": "noreply@email.texashomescapital.com"
+  },
+
+  // ── Observability (Workers Logs in Cloudflare dashboard) ─────────────────
+  "observability": {
+    "enabled": true
+  }
+
+  // ── Secrets (set via CLI — never commit these) ─────────────────────────────
+  // wrangler secret put RESEND_API_KEY
+}

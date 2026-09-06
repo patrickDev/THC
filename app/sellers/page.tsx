@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Container } from '@/components/layout/Container';
 import { Reveal } from '@/components/motion/Reveal';
+import { StaggerGroup } from '@/components/motion/StaggerGroup';
 import { Steps } from '@/components/sections/Steps';
 import { ComparisonTable } from '@/components/sections/ComparisonTable';
 import { FAQ } from '@/components/sections/FAQ';
@@ -8,7 +9,7 @@ import { LeadForm } from '@/components/forms/LeadForm';
 import { SELLER_CONFIG } from '@/components/forms/fieldConfigs';
 import { submitSellerLead } from '@/app/actions/leads';
 import { COMPANY } from '@/lib/utils';
-import { ShieldCheck, Clock, DollarSign, Heart } from 'lucide-react';
+import { ShieldCheck, Clock, DollarSign, Heart, Home, Zap, Users, Truck, Sunset, Activity, CheckCircle2, ArrowRight } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Sell Your Texas Home Fast for Cash',
@@ -31,13 +32,11 @@ const SELLER_FAQS = [
   { question: 'Am I obligated to accept the offer?', answer: 'Never. Our offers come with zero obligation. If it doesn\'t work for you, there\'s no pressure — we understand this is a big decision.' },
 ];
 
-const MARKETS = COMPANY.markets.map((m) => ({ value: m, label: m }));
-
 export default function SellersPage() {
   return (
     <>
       {/* Hero — two-column: copy left, form right */}
-      <section className="bg-bg py-12 md:py-20">
+      <section id="get-offer" className="bg-bg py-12 md:py-20">
         <Container>
           <div className="grid gap-10 lg:grid-cols-2 lg:gap-14 lg:items-start">
 
@@ -127,6 +126,156 @@ export default function SellersPage() {
         subhead="No phone tag, no surprise fees, no waiting months."
         steps={STEPS}
       />
+
+      {/* Do You Need To Sell */}
+      <section className="py-16 md:py-24 bg-bg">
+        <Container>
+          {/* Header */}
+          <Reveal className="mb-12 max-w-3xl">
+            <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-accent">
+              We Can Help
+            </p>
+            <h2 className="font-display text-display-md font-bold text-text">
+              Do you need to sell your house?{' '}
+              <span className="text-accent">Let us help!</span>
+            </h2>
+            <p className="mt-5 text-lg leading-relaxed text-muted">
+              Even if an agent can&rsquo;t sell your house, we can assist you. Selling through a
+              real estate agent isn&rsquo;t always the best option for everyone. Plus, as an added
+              bonus&hellip;
+            </p>
+          </Reveal>
+
+          {/* Two-column: checklist + callout */}
+          <div className="grid gap-10 lg:grid-cols-2 lg:gap-16 lg:items-start">
+            {/* Left: animated checklist */}
+            <StaggerGroup staggerMs={90} className="space-y-4">
+              {[
+                "You don't need to clean or repair the property!",
+                'We place a cash escrow deposit on every property!',
+                'No contracts binding you to an agent or paying any commissions!',
+                'We support you and your family every step of the way!',
+                'Yes, we are local here in Texas!',
+                'We cover all costs!',
+                'No inspections needed — we buy the property 100% AS-IS!',
+              ].map((item) => (
+                <div
+                  key={item}
+                  className="flex items-start gap-4 rounded-2xl border border-border bg-bg-card px-5 py-4 shadow-card"
+                >
+                  <CheckCircle2
+                    size={20}
+                    className="mt-0.5 shrink-0 text-sage"
+                    aria-hidden="true"
+                  />
+                  <p className="text-sm font-medium leading-relaxed text-text">{item}</p>
+                </div>
+              ))}
+            </StaggerGroup>
+
+            {/* Right: closing copy + callout */}
+            <Reveal delay={0.1} className="flex flex-col gap-6">
+              <p className="text-lg leading-relaxed text-muted">
+                We&rsquo;ll let you know right away if we can help you. Unlike selling through an
+                agent, you won&rsquo;t have to wait to see if the buyer secures
+                financing &mdash;{' '}
+                <strong className="font-semibold text-text">
+                  {COMPANY.name} is ready to buy immediately!
+                </strong>
+              </p>
+
+              {/* Dark callout */}
+              <div className="relative overflow-hidden rounded-3xl bg-text p-8">
+                {/* Subtle dot pattern */}
+                <div
+                  className="pointer-events-none absolute inset-0 opacity-[0.05]"
+                  style={{
+                    backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)',
+                    backgroundSize: '24px 24px',
+                  }}
+                  aria-hidden="true"
+                />
+                {/* Brand glow */}
+                <div
+                  className="pointer-events-none absolute -bottom-10 -right-10 h-40 w-40 rounded-full opacity-30"
+                  style={{ background: 'radial-gradient(circle, #C0603C 0%, transparent 70%)' }}
+                  aria-hidden="true"
+                />
+                <p className="relative text-base leading-relaxed" style={{ color: 'rgba(245,237,228,0.85)' }}>
+                  Our aim is to make your life easier by relieving you of the property that&rsquo;s
+                  causing you stress, all while offering a{' '}
+                  <strong style={{ color: '#F5EDE4' }}>quick, fair, and honest price</strong>{' '}
+                  for your home.
+                </p>
+                <a
+                  href="#get-offer"
+                  className="relative mt-6 inline-flex items-center gap-2 rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
+                >
+                  Get my free cash offer
+                  <ArrowRight size={16} aria-hidden="true" />
+                </a>
+              </div>
+            </Reveal>
+          </div>
+        </Container>
+      </section>
+
+      {/* Speedy sale + reasons */}
+      <section className="py-16 md:py-24 bg-bg-secondary">
+        <Container>
+          <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 lg:items-center">
+            {/* Left: copy */}
+            <Reveal>
+              <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-accent">
+                Any Situation. Any Condition.
+              </p>
+              <h2 className="font-display text-display-md font-bold text-text">
+                Need to sell fast? We&rsquo;ve got you covered.
+              </h2>
+              <p className="mt-5 text-lg leading-prose text-muted">
+                If you require a speedy sale for any reason, we&rsquo;ll provide you with an offer
+                within <strong className="font-semibold text-text">24 hours</strong>. If our offer
+                aligns with your needs, simply select the closing date and prepare to move forward.
+              </p>
+              <a
+                href="#get-offer"
+                className="mt-8 inline-flex min-h-[48px] items-center gap-2 rounded-xl bg-accent px-7 font-semibold text-accent-fg transition-colors hover:bg-accent-hover"
+              >
+                Get my cash offer
+              </a>
+            </Reveal>
+
+            {/* Right: reasons grid */}
+            <div>
+              <Reveal delay={0.06}>
+                <p className="mb-5 text-sm font-semibold text-muted">
+                  Some reasons our clients have sold their house as-is for a cash offer:
+                </p>
+              </Reveal>
+              <StaggerGroup staggerMs={80} className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                {[
+                  { label: 'Inherited Home', Icon: Home },
+                  { label: 'Damage', Icon: Zap },
+                  { label: 'Divorce', Icon: Users },
+                  { label: 'Relocating', Icon: Truck },
+                  { label: 'Retirement', Icon: Sunset },
+                  { label: 'Health Issues', Icon: Activity },
+                ].map(({ label, Icon }) => (
+                  <div
+                    key={label}
+                    className="flex flex-col items-center gap-3 rounded-2xl border border-border bg-bg-card p-5 text-center shadow-card transition-shadow hover:shadow-md"
+                  >
+                    <span className="flex h-11 w-11 items-center justify-center rounded-full bg-accent-light text-accent">
+                      <Icon size={20} aria-hidden="true" />
+                    </span>
+                    <span className="text-sm font-semibold text-text">{label}</span>
+                  </div>
+                ))}
+              </StaggerGroup>
+            </div>
+          </div>
+        </Container>
+      </section>
 
       <ComparisonTable />
 

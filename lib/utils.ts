@@ -25,7 +25,7 @@ export function slugify(str: string): string {
 export const COMPANY = {
   name: 'Texas Homes & Capital',
   shortName: 'THC',
-  phone: '(713) 555-0100',
+  phone: '+1 469-966-0619',
   email: 'service@texashomescapital.com',
   markets: ['Austin, TX', 'Dallas, TX', 'Houston, TX', 'San Antonio, TX'],
   tagline: 'Real estate for Texans, by Texans — serving all of Texas.',

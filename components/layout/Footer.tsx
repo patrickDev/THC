@@ -120,11 +120,22 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-10 flex flex-col gap-3 border-t border-border pt-6 text-xs text-muted sm:flex-row sm:items-center sm:justify-between">
-          <p>
-            &copy; {year} {COMPANY.legalName}. All rights reserved.
-          </p>
-          <p className="max-w-prose leading-relaxed">
+        <div className="mt-10 border-t border-border pt-6 text-xs text-muted">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p>
+              &copy; {year} {COMPANY.legalName}. All rights reserved.
+            </p>
+            <div className="flex items-center gap-4">
+              <Link href="/privacy" className="transition-colors hover:text-accent">
+                Privacy Policy
+              </Link>
+              <span className="text-border">|</span>
+              <Link href="/terms" className="transition-colors hover:text-accent">
+                Terms &amp; Conditions
+              </Link>
+            </div>
+          </div>
+          <p className="mt-3 max-w-prose leading-relaxed">
             We are real estate investors, not licensed real estate agents or brokers. All offers are
             made with the intent to purchase for investment purposes. Prices and terms subject to
             change.

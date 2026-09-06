@@ -9,15 +9,17 @@
     "lint": "next lint",
     "format": "prettier --write .",
     "type-check": "tsc --noEmit",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push",
+    "db:generate": "node --env-file=.env.local node_modules/.bin/drizzle-kit generate",
+    "db:migrate": "node --env-file=.env.local node_modules/.bin/drizzle-kit migrate",
+    "db:push": "node --env-file=.env.local node_modules/.bin/drizzle-kit push",
     "db:seed": "tsx --env-file=.env.local db/seed.ts",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "node --env-file=.env.local node_modules/.bin/drizzle-kit studio",
+    "build:cf": "node scripts/patch-open-next.cjs && npx @opennextjs/cloudflare build",
+    "deploy": "node scripts/patch-open-next.cjs && npx @opennextjs/cloudflare deploy"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
-    "@libsql/client": "^0.14.0",
+    "@libsql/client": "^0.17.4",
     "@react-email/components": "^0.0.26",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.36.1",
@@ -32,6 +34,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "^1.20.4",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
@@ -44,6 +47,7 @@
     "prettier-plugin-tailwindcss": "^0.6.8",
     "tailwindcss": "^3.4.15",
     "tsx": "^4.19.1",
-    "typescript": "^5.6.0"
+    "typescript": "^5.6.0",
+    "wrangler": "^4.127.1"
   }
 }

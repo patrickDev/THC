@@ -28,8 +28,8 @@ export function Header() {
     <>
       <header
         className={cn(
-          'fixed inset-x-0 top-0 z-30 transition-shadow duration-200',
-          scrolled ? 'bg-bg/95 shadow-soft backdrop-blur-md' : 'bg-bg/80 backdrop-blur-sm'
+          'fixed inset-x-0 top-0 z-30 bg-bg/95 backdrop-blur-md transition-shadow duration-300',
+          scrolled ? 'shadow-soft' : ''
         )}
         style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
       >
@@ -59,7 +59,7 @@ export function Header() {
                 className={cn(
                   'rounded-xl px-4 py-2 text-sm font-medium transition-colors',
                   pathname === link.href
-                    ? 'bg-accent-light text-accent'
+                    ? 'bg-accent-light text-accent font-semibold'
                     : 'text-muted hover:bg-bg-secondary hover:text-text'
                 )}
               >
@@ -75,7 +75,7 @@ export function Header() {
             {/* Desktop CTA */}
             <Link
               href="/sellers"
-              className="hidden rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-accent-fg transition-colors hover:bg-accent-hover lg:inline-flex"
+              className="hidden rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-white shadow-md shadow-black/20 transition-colors hover:bg-accent-hover lg:inline-flex"
             >
               Get a Cash Offer
             </Link>
@@ -86,7 +86,7 @@ export function Header() {
               aria-label="Open navigation menu"
               aria-expanded={menuOpen}
               aria-controls="mobile-nav"
-              className="flex h-10 w-10 items-center justify-center rounded-xl text-muted transition-colors hover:bg-bg-secondary hover:text-text lg:hidden"
+              className="flex h-10 w-10 items-center justify-center rounded-xl text-text transition-colors hover:bg-bg-secondary lg:hidden"
             >
               <Menu size={22} />
             </button>

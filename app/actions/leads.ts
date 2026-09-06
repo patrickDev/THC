@@ -1,7 +1,7 @@
 'use server';
 
 import { headers } from 'next/headers';
-import { db, enableForeignKeys } from '@/db/index';
+import { getDb, enableForeignKeys } from '@/db/index';
 import { leads, sellerSubmissions, buyerPreferences, partnerApplications } from '@/db/schema';
 import { sellerSchema, buyerSchema, partnerSchema, homeContactSchema } from '@/lib/validations';
 import { hashIp, checkRateLimit } from '@/lib/utils';
@@ -54,8 +54,9 @@ export async function submitSellerLead(fd: FormData): Promise<ActionResult> {
 
   let savedLead: typeof leads.$inferSelect | undefined;
 
-  await db.transaction(async (tx) => {
-    const [lead] = await tx
+  try {
+    const db = await getDb();
+    const [lead] = await db
       .insert(leads)
       .values({
         leadType: 'seller',
@@ -73,7 +74,7 @@ export async function submitSellerLead(fd: FormData): Promise<ActionResult> {
 
     savedLead = lead;
 
-    await tx.insert(sellerSubmissions).values({
+    await db.insert(sellerSubmissions).values({
       leadId: lead.id,
       propertyAddress: data.propertyAddress,
       propertyCity: data.propertyCity,
@@ -86,13 +87,13 @@ export async function submitSellerLead(fd: FormData): Promise<ActionResult> {
         : null,
       reasonForSelling: data.reasonForSelling ?? null,
     });
-  });
+  } catch (err) {
+    console.error('[db] seller lead insert failed:', err);
+    return { ok: false };
+  }
 
-  // Fire-and-forget emails
   if (savedLead) {
-    sendLeadEmails({ lead: savedLead, detail: null }).catch((err) =>
-      console.error('[email] seller lead emails failed:', err)
-    );
+    await sendLeadEmails({ lead: savedLead, detail: null });
   }
 
   return { ok: true };
@@ -136,8 +137,9 @@ export async function submitBuyerLead(fd: FormData): Promise<ActionResult> {
 
   let savedLead: typeof leads.$inferSelect | undefined;
 
-  await db.transaction(async (tx) => {
-    const [lead] = await tx
+  try {
+    const db = await getDb();
+    const [lead] = await db
       .insert(leads)
       .values({
         leadType: 'buyer',
@@ -158,7 +160,7 @@ export async function submitBuyerLead(fd: FormData): Promise<ActionResult> {
     const budgetMinCents = parseDollarsToCents(data.budgetMin) ?? 0;
     const budgetMaxCents = parseDollarsToCents(data.budgetMax) ?? 0;
 
-    await tx.insert(buyerPreferences).values({
+    await db.insert(buyerPreferences).values({
       leadId: lead.id,
       budgetMinCents,
       budgetMaxCents,
@@ -166,12 +168,13 @@ export async function submitBuyerLead(fd: FormData): Promise<ActionResult> {
       markets: data.markets,
       financingType: data.financingType,
     });
-  });
+  } catch (err) {
+    console.error('[db] buyer lead insert failed:', err);
+    return { ok: false };
+  }
 
   if (savedLead) {
-    sendLeadEmails({ lead: savedLead, detail: null }).catch((err) =>
-      console.error('[email] buyer lead emails failed:', err)
-    );
+    await sendLeadEmails({ lead: savedLead, detail: null });
   }
 
   return { ok: true };
@@ -216,8 +219,9 @@ export async function submitPartnerLead(fd: FormData): Promise<ActionResult> {
 
   let savedLead: typeof leads.$inferSelect | undefined;
 
-  await db.transaction(async (tx) => {
-    const [lead] = await tx
+  try {
+    const db = await getDb();
+    const [lead] = await db
       .insert(leads)
       .values({
         leadType: 'partner',
@@ -235,7 +239,7 @@ export async function submitPartnerLead(fd: FormData): Promise<ActionResult> {
 
     savedLead = lead;
 
-    await tx.insert(partnerApplications).values({
+    await db.insert(partnerApplications).values({
       leadId: lead.id,
       partnerType: data.partnerType,
       capitalAvailableCents: data.capitalAvailable
@@ -245,12 +249,13 @@ export async function submitPartnerLead(fd: FormData): Promise<ActionResult> {
       yearsExperience: data.yearsExperience ? parseInt(data.yearsExperience, 10) : null,
       accredited: data.accredited ?? false,
     });
-  });
+  } catch (err) {
+    console.error('[db] partner lead insert failed:', err);
+    return { ok: false };
+  }
 
   if (savedLead) {
-    sendLeadEmails({ lead: savedLead, detail: null }).catch((err) =>
-      console.error('[email] partner lead emails failed:', err)
-    );
+    await sendLeadEmails({ lead: savedLead, detail: null });
   }
 
   return { ok: true };
@@ -258,36 +263,43 @@ export async function submitPartnerLead(fd: FormData): Promise<ActionResult> {
 
 // ─── Home Contact Action ───────────────────────────────────────────────────────
 export async function submitHomeLead(fd: FormData): Promise<ActionResult> {
-  const ip = await getClientIp();
-  const ipHash = hashIp(ip);
-  const rateCheck = checkRateLimit(ipHash);
-  if (!rateCheck.allowed) {
-    return { ok: false, errors: { _: ['Too many submissions. Please try again later.'] } };
-  }
-
-  const raw: Record<string, unknown> = {};
-  for (const [k, v] of fd.entries()) raw[k] = v;
-  raw.consent = raw.consent === 'true' || raw.consent === 'on';
-
-  const parse = homeContactSchema.safeParse(raw);
-  if (!parse.success) {
-    const errors: Record<string, string[]> = {};
-    for (const issue of parse.error.issues) {
-      const key = String(issue.path[0] ?? '_');
-      (errors[key] ??= []).push(issue.message);
+  try {
+    console.log('[home] step 1: action started');
+    const ip = await getClientIp();
+    console.log('[home] step 2: got ip', ip);
+    const ipHash = hashIp(ip);
+    const rateCheck = checkRateLimit(ipHash);
+    if (!rateCheck.allowed) {
+      return { ok: false, errors: { _: ['Too many submissions. Please try again later.'] } };
     }
-    return { ok: false, errors };
-  }
 
-  const data = parse.data;
-  if (data.website) return { ok: true };
+    const raw: Record<string, unknown> = {};
+    for (const [k, v] of fd.entries()) raw[k] = v;
+    raw.consent = raw.consent === 'true' || raw.consent === 'on';
+    console.log('[home] step 3: raw fields', Object.keys(raw).join(','), 'consent=', raw.consent);
 
-  await enableForeignKeys();
+    const parse = homeContactSchema.safeParse(raw);
+    if (!parse.success) {
+      console.log('[home] step 4: validation failed', JSON.stringify(parse.error.issues));
+      const errors: Record<string, string[]> = {};
+      for (const issue of parse.error.issues) {
+        const key = String(issue.path[0] ?? '_');
+        (errors[key] ??= []).push(issue.message);
+      }
+      return { ok: false, errors };
+    }
+    console.log('[home] step 4: validation passed');
 
-  let savedLead: typeof leads.$inferSelect | undefined;
+    const data = parse.data;
+    if (data.website) return { ok: true };
 
-  await db.transaction(async (tx) => {
-    const [lead] = await tx
+    await enableForeignKeys();
+    console.log('[home] step 5: getting db');
+
+    const db = await getDb();
+    console.log('[home] step 6: inserting lead');
+
+    const [lead] = await db
       .insert(leads)
       .values({
         leadType: 'seller',
@@ -303,14 +315,17 @@ export async function submitHomeLead(fd: FormData): Promise<ActionResult> {
       })
       .returning();
 
-    savedLead = lead;
-  });
+    console.log('[home] step 7: lead saved, id=', lead?.id);
 
-  if (savedLead) {
-    sendLeadEmails({ lead: savedLead, detail: null }).catch((err) =>
-      console.error('[email] home lead emails failed:', err)
-    );
+    if (lead) {
+      console.log('[home] step 8: sending emails');
+      await sendLeadEmails({ lead, detail: null });
+      console.log('[home] step 9: emails done');
+    }
+
+    return { ok: true };
+  } catch (err) {
+    console.error('[home] FATAL error:', err);
+    return { ok: false };
   }
-
-  return { ok: true };
 }

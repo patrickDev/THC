@@ -19,10 +19,10 @@ interface StepsProps {
 
 export function Steps({ eyebrow, heading, subhead, steps }: StepsProps) {
   return (
-    <section className="py-16 md:py-24 bg-bg-secondary">
+    <section className="py-16 md:py-28 bg-bg">
       <Container>
-        {/* Header */}
-        <Reveal className="mb-12 max-w-2xl">
+        {/* Section header */}
+        <Reveal className="mb-16 max-w-2xl">
           {eyebrow && (
             <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-accent">
               {eyebrow}
@@ -35,25 +35,28 @@ export function Steps({ eyebrow, heading, subhead, steps }: StepsProps) {
         </Reveal>
 
         {/* Steps */}
-        <StaggerGroup className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <StaggerGroup className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((step, i) => (
-            <div
-              key={i}
-              className="relative rounded-2xl border border-border bg-bg-card p-6 shadow-card"
-            >
-              {/* Connector line */}
+            <div key={i} className="group relative">
+              {/* Connector line between steps */}
               {i < steps.length - 1 && (
                 <div
-                  className="absolute right-0 top-[2.25rem] hidden h-px w-8 translate-x-full bg-border lg:block"
+                  className="absolute left-[2.75rem] top-[1.375rem] hidden h-px w-[calc(100%+2rem)] bg-gradient-to-r from-border to-transparent lg:block"
                   aria-hidden="true"
                 />
               )}
-              <div className="mb-4 flex items-center gap-3">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-light text-sm font-bold text-accent">
+
+              {/* Step number circle */}
+              <div className="mb-5 flex items-center gap-4">
+                <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-bold text-white shadow-lg shadow-accent/30 ring-4 ring-bg">
                   {step.number}
                 </span>
-                <step.Icon size={20} className="text-muted" aria-hidden="true" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-light transition-colors group-hover:bg-accent/10">
+                  <step.Icon size={18} className="text-accent" aria-hidden="true" />
+                </div>
               </div>
+
+              {/* Content */}
               <h3 className="mb-2 font-display text-xl font-semibold text-text">{step.title}</h3>
               <p className="text-sm leading-relaxed text-muted">{step.description}</p>
             </div>

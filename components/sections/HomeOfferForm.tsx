@@ -20,6 +20,7 @@ export function HomeOfferForm() {
     register,
     handleSubmit,
     setError,
+    reset,
     formState: { errors },
   } = useForm<HomeContactValues>({
     resolver: zodResolver(homeContactSchema),
@@ -33,14 +34,19 @@ export function HomeOfferForm() {
     });
 
     startTransition(async () => {
-      const result = await submitHomeLead(fd);
-      if (result.ok) {
-        setDone(true);
-      } else if (result.errors) {
-        Object.entries(result.errors).forEach(([field, msgs]) => {
-          setError(field as keyof HomeContactValues, { message: msgs[0] });
-        });
-      } else {
+      try {
+        const result = await submitHomeLead(fd);
+        if (result.ok) {
+          reset();
+          setDone(true);
+        } else if (result.errors) {
+          Object.entries(result.errors).forEach(([field, msgs]) => {
+            setError(field as keyof HomeContactValues, { message: msgs[0] });
+          });
+        } else {
+          setServerError('Something went wrong. Please try again.');
+        }
+      } catch {
         setServerError('Something went wrong. Please try again.');
       }
     });
@@ -61,8 +67,9 @@ export function HomeOfferForm() {
       <input
         type="text"
         tabIndex={-1}
-        aria-hidden="true"
         autoComplete="off"
+        // @ts-expect-error inert is a valid HTML attribute not yet in React types
+        inert=""
         style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px' }}
         {...register('website')}
       />

@@ -22,25 +22,31 @@ export function CTABand({
 }: CTABandProps) {
   return (
     <section
-      className="relative overflow-hidden py-16 md:py-24"
+      className="relative overflow-hidden py-20 md:py-28"
       style={{
         background: dark
-          ? 'linear-gradient(135deg, #C0603C 0%, #9E4828 100%)'
+          ? 'linear-gradient(135deg, #C0603C 0%, #7a3018 100%)'
           : undefined,
         backgroundColor: dark ? undefined : 'var(--color-bg-secondary)',
       }}
     >
-      {/* Subtle pattern */}
+      {/* Layered texture */}
       {dark && (
-        <div
-          className="pointer-events-none absolute inset-0 opacity-10"
-          style={{
-            backgroundImage:
-              'radial-gradient(circle, rgba(255,255,255,0.3) 1px, transparent 1px)',
-            backgroundSize: '28px 28px',
-          }}
-          aria-hidden="true"
-        />
+        <>
+          <div
+            className="pointer-events-none absolute inset-0 opacity-[0.07]"
+            style={{
+              backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)',
+              backgroundSize: '24px 24px',
+            }}
+            aria-hidden="true"
+          />
+          <div
+            className="pointer-events-none absolute -bottom-32 right-0 h-[500px] w-[500px] rounded-full opacity-30"
+            style={{ background: 'radial-gradient(circle, rgba(255,200,150,0.4) 0%, transparent 65%)' }}
+            aria-hidden="true"
+          />
+        </>
       )}
 
       <Container className="relative z-10 text-center">

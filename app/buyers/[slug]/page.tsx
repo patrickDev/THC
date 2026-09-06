@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { db } from '@/db/index';
+import Link from 'next/link';
+import { getDb } from '@/db/index';
 import { properties } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { Container } from '@/components/layout/Container';
@@ -19,7 +20,7 @@ interface PropertyPageProps {
 
 export async function generateMetadata({ params }: PropertyPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const [property] = await db.select().from(properties).where(eq(properties.slug, slug)).limit(1);
+  const [property] = await (await getDb()).select().from(properties).where(eq(properties.slug, slug)).limit(1);
   if (!property) return { title: 'Property Not Found' };
 
   return {
@@ -33,16 +34,13 @@ export async function generateMetadata({ params }: PropertyPageProps): Promise<M
   };
 }
 
-export async function generateStaticParams() {
-  const slugs = await db.select({ slug: properties.slug }).from(properties);
-  return slugs.map((p) => ({ slug: p.slug }));
-}
+export const dynamic = 'force-dynamic';
 
 const MARKETS = COMPANY.markets.map((m) => ({ value: m, label: m }));
 
 export default async function PropertyPage({ params }: PropertyPageProps) {
   const { slug } = await params;
-  const [property] = await db.select().from(properties).where(eq(properties.slug, slug)).limit(1);
+  const [property] = await (await getDb()).select().from(properties).where(eq(properties.slug, slug)).limit(1);
 
   if (!property) notFound();
 
@@ -63,7 +61,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
         <Container>
           {/* Breadcrumb */}
           <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-1.5 text-sm text-muted">
-            <a href="/buyers" className="hover:text-accent">Properties</a>
+            <Link href="/buyers" className="hover:text-accent">Properties</Link>
             <span aria-hidden="true">/</span>
             <span className="text-text">{property.title}</span>
           </nav>

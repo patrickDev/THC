@@ -19,13 +19,14 @@ const containerVariants = (staggerMs: number, reduce: boolean) => ({
 });
 
 const itemVariants = (reduce: boolean) => ({
-  hidden: reduce ? {} : { opacity: 0, y: 16 },
+  hidden: reduce ? {} : { opacity: 0, y: 24, scale: 0.96 },
   visible: reduce
     ? {}
     : {
         opacity: 1,
         y: 0,
-        transition: { duration: 0.45, ease: 'easeOut' },
+        scale: 1,
+        transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
       },
 });
 

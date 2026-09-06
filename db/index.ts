@@ -1,34 +1,46 @@
-import { createClient } from '@libsql/client';
-import { drizzle } from 'drizzle-orm/libsql';
+import { drizzle as drizzleD1 } from 'drizzle-orm/d1';
 import * as schema from './schema';
 
-// Guard against hot-reload creating multiple connections in dev
-const globalForDb = globalThis as unknown as {
-  _thcDbClient: ReturnType<typeof createClient> | undefined;
-};
+// Use the D1 type as the canonical DB type (same query API as libsql)
+type Db = ReturnType<typeof drizzleD1<typeof schema>>;
 
-function createDbClient() {
-  const url = process.env.DATABASE_URL;
-  if (!url) throw new Error('DATABASE_URL is not set');
+// Dev singleton guard
+const _g = globalThis as unknown as { _thcDevDb: Db | undefined };
 
-  const authToken = process.env.DATABASE_AUTH_TOKEN;
-
-  return createClient({
-    url,
-    // Only pass authToken when it is present (Turso prod); local file mode ignores it
-    ...(authToken ? { authToken } : {}),
-  });
+async function getDevDb(): Promise<Db> {
+  if (!_g._thcDevDb) {
+    const url = process.env.DATABASE_URL;
+    if (!url) throw new Error('DATABASE_URL is not set');
+    // Dynamic imports keep @libsql out of the Cloudflare Workers bundle
+    const [{ drizzle }, { createClient }] = await Promise.all([
+      import('drizzle-orm/libsql'),
+      import('@libsql/client/web'),
+    ]);
+    const client = createClient({
+      url,
+      ...(process.env.DATABASE_AUTH_TOKEN ? { authToken: process.env.DATABASE_AUTH_TOKEN } : {}),
+    });
+    _g._thcDevDb = drizzle(client, { schema }) as unknown as Db;
+  }
+  return _g._thcDevDb!;
 }
 
-const client = globalForDb._thcDbClient ?? createDbClient();
-
-if (process.env.NODE_ENV !== 'production') {
-  globalForDb._thcDbClient = client;
+export async function getDb(): Promise<Db> {
+  if (process.env.NODE_ENV === 'production') {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { getCloudflareContext } = require('@opennextjs/cloudflare') as typeof import('@opennextjs/cloudflare');
+    const { env } = getCloudflareContext();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return drizzleD1((env as any).DB, { schema });
+  }
+  return getDevDb();
 }
 
-export const db = drizzle(client, { schema });
-
-// Enable foreign key enforcement — SQLite does NOT do this by default
 export async function enableForeignKeys() {
-  await client.execute('PRAGMA foreign_keys = ON');
+  // D1 handles FK constraints natively; only needed for local libsql
+  if (process.env.NODE_ENV !== 'production') {
+    const { sql } = await import('drizzle-orm');
+    const db = await getDevDb();
+    await db.run(sql`PRAGMA foreign_keys = ON`);
+  }
 }

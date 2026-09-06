@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useTransition, useId } from 'react';
+import { useRef, useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { sellerSchema, buyerSchema, partnerSchema } from '@/lib/validations';
@@ -30,7 +30,7 @@ const SCHEMAS = {
   partner: partnerSchema,
 } as const;
 
-interface LeadFormProps<T extends Record<string, unknown>> {
+interface LeadFormProps {
   action: (formData: FormData) => Promise<{ ok: boolean; errors?: Record<string, string[]> }>;
   leadType: 'buyer' | 'seller' | 'partner';
   title: string;
@@ -42,7 +42,7 @@ interface LeadFormProps<T extends Record<string, unknown>> {
   successBody?: string;
 }
 
-export function LeadForm<T extends Record<string, unknown>>({
+export function LeadForm({
   action,
   leadType,
   title,
@@ -52,8 +52,7 @@ export function LeadForm<T extends Record<string, unknown>>({
   markets,
   successHeading,
   successBody,
-}: LeadFormProps<T>) {
-  const uid = useId();
+}: LeadFormProps) {
   const errorSummaryRef = useRef<HTMLDivElement>(null);
   const [done, setDone] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -63,8 +62,9 @@ export function LeadForm<T extends Record<string, unknown>>({
     register,
     handleSubmit,
     setError,
+    reset,
     formState: { errors },
-  } = useForm<T>({
+  } = useForm<Record<string, unknown>>({
     resolver: zodResolver(SCHEMAS[leadType]),
     mode: 'onBlur',
   });
@@ -73,9 +73,9 @@ export function LeadForm<T extends Record<string, unknown>>({
     .map((e) => (e as { message?: string }).message)
     .filter(Boolean) as string[];
 
-  async function onSubmit(data: T) {
+  async function onSubmit(data: Record<string, unknown>) {
     const fd = new FormData();
-    Object.entries(data as Record<string, unknown>).forEach(([k, v]) => {
+    Object.entries(data).forEach(([k, v]) => {
       if (Array.isArray(v)) {
         v.forEach((item) => fd.append(k, String(item)));
       } else if (v !== undefined && v !== null) {
@@ -85,15 +85,20 @@ export function LeadForm<T extends Record<string, unknown>>({
     fd.append('leadType', leadType);
 
     startTransition(async () => {
-      const result = await action(fd);
-      if (result.ok) {
-        setDone(true);
-      } else if (result.errors) {
-        Object.entries(result.errors).forEach(([field, msgs]) => {
-          setError(field as Parameters<typeof setError>[0], { message: msgs[0] });
-        });
-        setTimeout(() => errorSummaryRef.current?.focus(), 50);
-      } else {
+      try {
+        const result = await action(fd);
+        if (result.ok) {
+          reset();
+          setDone(true);
+        } else if (result.errors) {
+          Object.entries(result.errors).forEach(([field, msgs]) => {
+            setError(field as Parameters<typeof setError>[0], { message: msgs[0] });
+          });
+          setTimeout(() => errorSummaryRef.current?.focus(), 50);
+        } else {
+          setServerError('Something went wrong. Please try again.');
+        }
+      } catch {
         setServerError('Something went wrong. Please try again.');
       }
     });
@@ -141,8 +146,9 @@ export function LeadForm<T extends Record<string, unknown>>({
         <input
           type="text"
           tabIndex={-1}
-          aria-hidden="true"
           autoComplete="off"
+          // @ts-expect-error inert is a valid HTML attribute not yet in React types
+          inert=""
           style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px' }}
           {...register('website' as Parameters<typeof register>[0])}
         />

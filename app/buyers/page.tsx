@@ -1,12 +1,18 @@
 import type { Metadata } from 'next';
+import { getDb } from '@/db/index';
+import { properties } from '@/db/schema';
+import { desc } from 'drizzle-orm';
 import { Container } from '@/components/layout/Container';
 import { Reveal } from '@/components/motion/Reveal';
+import { PropertyGrid } from '@/components/sections/PropertyGrid';
 import { FAQ } from '@/components/sections/FAQ';
 import { CTABand } from '@/components/sections/CTABand';
 import { LeadForm } from '@/components/forms/LeadForm';
 import { BUYER_CONFIG } from '@/components/forms/fieldConfigs';
 import { submitBuyerLead } from '@/app/actions/leads';
 import { COMPANY } from '@/lib/utils';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Investment Properties for Sale',
@@ -25,6 +31,11 @@ const BUYER_FAQS = [
 const MARKETS = COMPANY.markets.map((m) => ({ value: m, label: m }));
 
 export default async function BuyersPage() {
+  const allProperties = await (await getDb())
+    .select()
+    .from(properties)
+    .orderBy(desc(properties.createdAt));
+
   return (
     <>
       {/* Hero */}
@@ -44,6 +55,23 @@ export default async function BuyersPage() {
           </Reveal>
         </Container>
       </section>
+
+      {/* Property listings */}
+      {allProperties.length > 0 && (
+        <section className="bg-bg-secondary py-16 md:py-24">
+          <Container>
+            <Reveal className="mb-10">
+              <h2 className="font-display text-display-md font-bold text-text">
+                Available properties
+              </h2>
+              <p className="mt-3 text-lg text-muted">
+                {allProperties.length} propert{allProperties.length === 1 ? 'y' : 'ies'} across our Texas markets.
+              </p>
+            </Reveal>
+            <PropertyGrid properties={allProperties} />
+          </Container>
+        </section>
+      )}
 
       {/* Process explainer */}
       <section className="bg-bg py-16 md:py-24">

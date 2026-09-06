@@ -45,6 +45,10 @@ export const metadata: Metadata = {
     description: 'Buy and sell Texas homes fast — no repairs, no commissions, no pressure.',
   },
   robots: { index: true, follow: true },
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+  },
 };
 
 export const viewport: Viewport = {
